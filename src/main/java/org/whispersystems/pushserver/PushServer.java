@@ -2,6 +2,7 @@ package org.whispersystems.pushserver;
 
 import com.codahale.metrics.SharedMetricRegistries;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.whispersystems.pushserver.auth.Server;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
 import org.whispersystems.pushserver.controllers.FeedbackController;
@@ -13,6 +14,7 @@ import org.whispersystems.pushserver.senders.GCMSender;
 import org.whispersystems.pushserver.senders.UnregisteredQueue;
 import org.whispersystems.pushserver.util.Constants;
 
+import java.security.Security;
 import java.util.List;
 
 import io.dropwizard.Application;
@@ -23,10 +25,12 @@ import redis.clients.jedis.JedisPool;
 
 public class PushServer extends Application<PushServerConfiguration> {
 
-  @Override
-  public void initialize(Bootstrap<PushServerConfiguration> bootstrap) {
-
+  static {
+    Security.addProvider(new BouncyCastleProvider());
   }
+
+  @Override
+  public void initialize(Bootstrap<PushServerConfiguration> bootstrap) {}
 
   @Override
   public void run(PushServerConfiguration config, Environment environment) throws Exception {
@@ -54,5 +58,9 @@ public class PushServer extends Application<PushServerConfiguration> {
     environment.jersey().register(new FeedbackController(gcmQueue, apnQueue));
 
     environment.healthChecks().register("Redis", new RedisHealthCheck(redisClient));
+  }
+
+  public static void main(String[] args) throws Exception {
+    new PushServer().run(args);
   }
 }

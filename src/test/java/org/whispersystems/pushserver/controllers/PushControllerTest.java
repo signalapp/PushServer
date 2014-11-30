@@ -5,7 +5,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
-import org.whispersystems.pushserver.config.TestAuthenticationConfig;
+import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 import org.whispersystems.pushserver.entities.ApnMessage;
 import org.whispersystems.pushserver.entities.GcmMessage;
 import org.whispersystems.pushserver.senders.APNSender;
@@ -29,7 +29,7 @@ public class PushControllerTest {
   public static final ResourceTestRule resources =
       ResourceTestRule.builder()
                       .addResource(new PushController(apnSender, gcmSender))
-                      .addProvider(new BasicAuthProvider<>(new ServerAuthenticator(new TestAuthenticationConfig()), "TEST"))
+                      .addProvider(new BasicAuthProvider<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST"))
                       .build();
 
   @Test

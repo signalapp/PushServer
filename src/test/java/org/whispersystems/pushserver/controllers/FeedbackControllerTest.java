@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
-import org.whispersystems.pushserver.config.TestAuthenticationConfig;
+import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 import org.whispersystems.pushserver.entities.UnregisteredEvent;
 import org.whispersystems.pushserver.entities.UnregisteredEventList;
 import org.whispersystems.pushserver.senders.UnregisteredQueue;
@@ -30,7 +30,7 @@ public class FeedbackControllerTest {
   public static final ResourceTestRule resources =
       ResourceTestRule.builder()
                       .addResource(new FeedbackController(gcmQueue, apnQueue))
-                      .addProvider(new BasicAuthProvider<>(new ServerAuthenticator(new TestAuthenticationConfig()), "TEST"))
+                      .addProvider(new BasicAuthProvider<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST"))
                       .build();
 
   @Before

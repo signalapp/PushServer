@@ -16,7 +16,7 @@
         <dropwizard.version>0.7.1</dropwizard.version>
         <jackson.api.version>2.3.3</jackson.api.version>
         <commons-codec.version>1.6</commons-codec.version>
-        <capsule.maven.plugin.version>0.9.1-SNAPSHOT</capsule.maven.plugin.version>
+        <capsule.maven.plugin.version>0.10.0</capsule.maven.plugin.version>
     </properties>
 
     <dependencies>
@@ -124,20 +124,29 @@
                             <types>fat</types>
                             <modes>
                                 <mode>
-                                    <name>relay</name>
+                                    <name>production</name>
                                     <manifest>
                                         <entry>
                                             <key>Args</key>
-                                            <value>server $CAPSULE_DIR/config/relay.yml</value>
+                                            <value>server $CAPSULE_DIR/config/production.yml</value>
                                         </entry>
                                     </manifest>
                                 </mode>
                                 <mode>
-                                    <name>master</name>
+                                    <name>staging</name>
                                     <manifest>
                                         <entry>
                                             <key>Args</key>
-                                            <value>server $CAPSULE_DIR/config/master.yml</value>
+                                            <value>server $CAPSULE_DIR/config/staging.yml</value>
+                                        </entry>
+                                    </manifest>
+                                </mode>
+                                <mode>
+                                    <name>local</name>
+                                    <manifest>
+                                        <entry>
+                                            <key>Args</key>
+                                            <value>server $CAPSULE_DIR/config/local.yml</value>
                                         </entry>
                                     </manifest>
                                 </mode>
@@ -147,8 +156,9 @@
                                     <directory>config/</directory>
                                     <outputDirectory>config/</outputDirectory>
                                     <includes>
-                                        <include>relay.yml</include>
-                                        <include>master.yml</include>
+                                        <include>production.yml</include>
+                                        <include>staging.yml</include>
+                                        <include>local.yml</include>
                                     </includes>
                                 </fileSet>
                             </fileSets>
