@@ -122,6 +122,12 @@
                         <configuration>
                             <appClass>org.whispersystems.pushserver.PushServer</appClass>
                             <types>fat</types>
+                            <manifest>
+                                <entry>
+                                    <key>JVM-Args</key>
+                                    <value>-server -Djava.awt.headless=true -Xmx512m -Xss512k</value>
+                                </entry>
+                            </manifest>
                             <modes>
                                 <mode>
                                     <name>production</name>
