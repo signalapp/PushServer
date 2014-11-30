@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <prerequisites>
+        <maven>3.1.0</maven>
+    </prerequisites>
+
+    <groupId>org.whispersystems</groupId>
+    <artifactId>Push-Server</artifactId>
+    <version>0.1</version>
+
+    <properties>
+        <dropwizard.version>0.7.1</dropwizard.version>
+        <jackson.api.version>2.3.3</jackson.api.version>
+        <commons-codec.version>1.6</commons-codec.version>
+        <capsule.maven.plugin.version>0.9.1-SNAPSHOT</capsule.maven.plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-core</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-auth</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-client</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-testing</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>1.18.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.spy</groupId>
+            <artifactId>spymemcached</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.notnoop.apns</groupId>
+            <artifactId>apns</artifactId>
+            <version>0.2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.igniterealtime.smack</groupId>
+            <artifactId>smack-tcp</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.6.1</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>140</version>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.chrischristo</groupId>
+                <artifactId>capsule-maven-plugin</artifactId>
+                <version>${capsule.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <appClass>org.whispersystems.pushserver.PushServer</appClass>
+                            <types>fat</types>
+                            <modes>
+                                <mode>
+                                    <name>relay</name>
+                                    <manifest>
+                                        <entry>
+                                            <key>Args</key>
+                                            <value>server $CAPSULE_DIR/config/relay.yml</value>
+                                        </entry>
+                                    </manifest>
+                                </mode>
+                                <mode>
+                                    <name>master</name>
+                                    <manifest>
+                                        <entry>
+                                            <key>Args</key>
+                                            <value>server $CAPSULE_DIR/config/master.yml</value>
+                                        </entry>
+                                    </manifest>
+                                </mode>
+                            </modes>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>config/</directory>
+                                    <outputDirectory>config/</outputDirectory>
+                                    <includes>
+                                        <include>relay.yml</include>
+                                        <include>master.yml</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
