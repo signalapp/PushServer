@@ -10,7 +10,7 @@
 
     <groupId>org.whispersystems</groupId>
     <artifactId>Push-Server</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 
     <properties>
         <dropwizard.version>0.7.1</dropwizard.version>
@@ -184,7 +184,7 @@
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <phase>package</phase> 
+                        <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
