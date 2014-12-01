@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.whispersystems.pushserver.config.ApnConfiguration;
 import org.whispersystems.pushserver.config.AuthenticationConfiguration;
 import org.whispersystems.pushserver.config.GcmConfiguration;
+import org.whispersystems.pushserver.config.MetricsConfiguration;
 import org.whispersystems.pushserver.config.RedisConfiguration;
 
 import javax.validation.Valid;
@@ -32,6 +33,15 @@ public class PushServerConfiguration extends Configuration {
   @Valid
   @NotNull
   private GcmConfiguration gcm;
+
+  @JsonProperty
+  @Valid
+  @NotNull
+  private MetricsConfiguration viz = new MetricsConfiguration();
+
+  public MetricsConfiguration getMetricsConfiguration() {
+    return viz;
+  }
 
   public AuthenticationConfiguration getAuthenticationConfiguration() {
     return authentication;

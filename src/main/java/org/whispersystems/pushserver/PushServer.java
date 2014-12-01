@@ -7,6 +7,7 @@ import org.whispersystems.pushserver.auth.Server;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
 import org.whispersystems.pushserver.controllers.FeedbackController;
 import org.whispersystems.pushserver.controllers.PushController;
+import org.whispersystems.pushserver.metrics.JsonMetricsReporter;
 import org.whispersystems.pushserver.providers.RedisClientFactory;
 import org.whispersystems.pushserver.providers.RedisHealthCheck;
 import org.whispersystems.pushserver.senders.APNSender;
@@ -16,6 +17,7 @@ import org.whispersystems.pushserver.util.Constants;
 
 import java.security.Security;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.dropwizard.Application;
 import io.dropwizard.auth.basic.BasicAuthProvider;
@@ -58,6 +60,13 @@ public class PushServer extends Application<PushServerConfiguration> {
     environment.jersey().register(new FeedbackController(gcmQueue, apnQueue));
 
     environment.healthChecks().register("Redis", new RedisHealthCheck(redisClient));
+
+    if (config.getMetricsConfiguration().isEnabled()) {
+      new JsonMetricsReporter(environment.metrics(),
+                              config.getMetricsConfiguration().getToken(),
+                              config.getMetricsConfiguration().getHost())
+          .start(60, TimeUnit.SECONDS);
+    }
   }
 
   public static void main(String[] args) throws Exception {

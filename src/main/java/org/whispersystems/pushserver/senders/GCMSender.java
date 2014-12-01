@@ -211,6 +211,7 @@ public class GCMSender implements Managed, PacketListener {
   }
 
   private void handleBadRegistration(Map<String, Object> message) {
+    logger.warn("Got GCM unregistered notice!");
     unregistered.mark();
 
     String messageId = (String) message.get("message_id");

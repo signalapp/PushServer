@@ -155,6 +155,7 @@ public class APNSender implements Managed {
         Optional<String> device = redisGet(registrationId);
 
         if (device.isPresent()) {
+          logger.warn("Got APN unregistered notice!");
           String[] parts    = device.get().split(".", 2);
 
           if (parts.length == 2) {
