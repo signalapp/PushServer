@@ -36,14 +36,14 @@ public class FeedbackControllerTest {
   @Before
   public void setup() {
     List<UnregisteredEvent> gcmEvents = new LinkedList<UnregisteredEvent>() {{
-      add(new UnregisteredEvent("1234", "+14152222222", 1));
-      add(new UnregisteredEvent("5678", "+14152222222", 2));
-      add(new UnregisteredEvent("9999", "+14151111111", 1));
+      add(new UnregisteredEvent("1234", "+14152222222", 1, System.currentTimeMillis()));
+      add(new UnregisteredEvent("5678", "+14152222222", 2, System.currentTimeMillis()));
+      add(new UnregisteredEvent("9999", "+14151111111", 1, System.currentTimeMillis()));
     }};
 
     List<UnregisteredEvent> apnEvents = new LinkedList<UnregisteredEvent>() {{
-      add(new UnregisteredEvent("6666", "+14151231234", 1));
-      add(new UnregisteredEvent("7777", "+14154444444", 1));
+      add(new UnregisteredEvent("6666", "+14151231234", 1, System.currentTimeMillis()));
+      add(new UnregisteredEvent("7777", "+14154444444", 1, System.currentTimeMillis()));
     }};
 
     when(gcmQueue.get(anyString())).thenReturn(gcmEvents);

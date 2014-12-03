@@ -222,7 +222,8 @@ public class GCMSender implements Managed, PacketListener {
       if (unacknowledgedMessage != null) {
         unregisteredQueue.put(new UnregisteredEvent(unacknowledgedMessage.getGcmId(),
                                                     unacknowledgedMessage.getNumber(),
-                                                    unacknowledgedMessage.getDeviceId()));
+                                                    unacknowledgedMessage.getDeviceId(),
+                                                    System.currentTimeMillis()));
       }
     }
   }

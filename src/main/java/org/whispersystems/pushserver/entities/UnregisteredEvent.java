@@ -14,12 +14,16 @@ public class UnregisteredEvent {
   @JsonProperty
   private int deviceId;
 
+  @JsonProperty
+  private long timestamp;
+
   public UnregisteredEvent() {}
 
-  public UnregisteredEvent(String registrationId, String number, int deviceId) {
+  public UnregisteredEvent(String registrationId, String number, int deviceId, long timestamp) {
     this.registrationId = registrationId;
     this.number         = number;
     this.deviceId       = deviceId;
+    this.timestamp      = timestamp;
   }
 
   @VisibleForTesting

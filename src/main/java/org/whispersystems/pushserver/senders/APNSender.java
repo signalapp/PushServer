@@ -159,10 +159,11 @@ public class APNSender implements Managed {
           String[] parts    = device.get().split(".", 2);
 
           if (parts.length == 2) {
-            String   number   = parts[0];
-            int      deviceId = Integer.parseInt(parts[1]);
+            String number    = parts[0];
+            int    deviceId  = Integer.parseInt(parts[1]);
+            long   timestamp = inactiveDevices.get(registrationId).getTime();
 
-            unregisteredQueue.put(new UnregisteredEvent(registrationId, number, deviceId));
+            unregisteredQueue.put(new UnregisteredEvent(registrationId, number, deviceId, timestamp));
           } else {
             logger.warn("APN unregister event for device with no parts: " + device.get());
           }
