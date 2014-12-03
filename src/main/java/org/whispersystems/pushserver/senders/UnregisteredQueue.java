@@ -52,7 +52,7 @@ public class UnregisteredQueue {
     try (Jedis jedis = jedisPool.getResource()) {
       String result;
 
-      while ((result = jedis.lpop(serverName)) != null) {
+      while ((result = jedis.lpop(serverName + "::" + prefix)) != null) {
         try {
           results.add(objectMapper.readValue(result, UnregisteredEvent.class));
         } catch (IOException e) {
