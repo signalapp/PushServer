@@ -66,17 +66,18 @@ public class APNSender implements Managed {
   private final UnregisteredQueue unregisteredQueue;
   private final String            apnCertificate;
   private final String            apnKey;
+  private final boolean           feedbackEnabled;
 
   private ApnsService apnService;
 
   public APNSender(JedisPool jedisPool, UnregisteredQueue unregisteredQueue,
-                   String apnCertificate, String apnKey)
+                   String apnCertificate, String apnKey, boolean feedbackEnabled)
   {
     this.jedisPool         = jedisPool;
     this.unregisteredQueue = unregisteredQueue;
     this.apnCertificate    = apnCertificate;
     this.apnKey            = apnKey;
-
+    this.feedbackEnabled   = feedbackEnabled;
   }
 
   public void sendMessage(ApnMessage message)
@@ -124,7 +125,9 @@ public class APNSender implements Managed {
                           .asQueued()
                           .withProductionDestination().build();
 
-    this.executor.scheduleAtFixedRate(new FeedbackRunnable(), 0, 1, TimeUnit.HOURS);
+    if (feedbackEnabled) {
+      this.executor.scheduleAtFixedRate(new FeedbackRunnable(), 0, 1, TimeUnit.HOURS);
+    }
   }
 
   @Override

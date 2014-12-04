@@ -30,11 +30,18 @@ public class ApnConfiguration {
   @JsonProperty
   private String key;
 
+  @JsonProperty
+  private boolean feedback = true;
+
   public String getCertificate() {
     return certificate;
   }
 
   public String getKey() {
     return key;
+  }
+
+  public boolean isFeedbackEnabled() {
+    return feedback;
   }
 }
