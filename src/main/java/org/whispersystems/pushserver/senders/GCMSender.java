@@ -32,7 +32,6 @@ import org.xmlpull.v1.XmlPullParser;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -336,19 +335,16 @@ public class GCMSender implements Managed, PacketListener {
     @Override
     public void authenticated(XMPPConnection xmppConnection) {
       logger.warn("GCM XMPP Authenticated.");
+      reconnectionSuccessful();
     }
 
     @Override
     public void reconnectionSuccessful() {
-      logger.warn("GCM XMPP Reconnecting..");
-      Iterator<Map.Entry<String, GcmMessage>> iterator =
-          pendingMessages.entrySet().iterator();
+      logger.warn("GCM XMPP Reconnected, resending... Pending Size: " + pendingMessages.size());
+      HashMap<String, GcmMessage> resendMessages = new HashMap<>(pendingMessages);
 
-      while (iterator.hasNext()) {
-        Map.Entry<String, GcmMessage> entry = iterator.next();
-        iterator.remove();
-
-        sendMessage(entry.getKey(), entry.getValue());
+      for (Map.Entry<String, GcmMessage> resendMessage : resendMessages.entrySet()) {
+        sendMessage(resendMessage.getKey(), resendMessage.getValue());
       }
     }
 
@@ -365,12 +361,12 @@ public class GCMSender implements Managed, PacketListener {
 
     @Override
     public void connectionClosedOnError(Exception e) {
-      logger.warn("GCM XMPP Connection closed on error.");
+      logger.warn("GCM XMPP Connection closed on error. Pending Size: " + pendingMessages.size());
     }
 
     @Override
     public void connectionClosed() {
-      logger.warn("GCM XMPP Connection closed.");
+      logger.warn("GCM XMPP Connection closed. Pending Size: " + pendingMessages.size());
       reconnect();
     }
   }
