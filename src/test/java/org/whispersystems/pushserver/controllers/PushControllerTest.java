@@ -5,13 +5,13 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
-import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 import org.whispersystems.pushserver.entities.ApnMessage;
 import org.whispersystems.pushserver.entities.GcmMessage;
 import org.whispersystems.pushserver.senders.APNSender;
 import org.whispersystems.pushserver.senders.GCMSender;
 import org.whispersystems.pushserver.senders.TransientPushFailureException;
 import org.whispersystems.pushserver.util.AuthHelper;
+import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 
 import javax.ws.rs.core.MediaType;
 

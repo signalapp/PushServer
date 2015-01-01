@@ -31,11 +31,18 @@ public class GcmConfiguration {
   @JsonProperty
   private String apiKey;
 
+  @JsonProperty
+  private boolean xmpp = false;
+
   public String getApiKey() {
     return apiKey;
   }
 
   public long getSenderId() {
     return senderId;
+  }
+
+  public boolean isXmpp() {
+    return xmpp;
   }
 }
