@@ -1,5 +1,8 @@
 package org.whispersystems.pushserver.senders;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -10,14 +13,23 @@ import org.whispersystems.gcm.server.Result;
 import org.whispersystems.gcm.server.Sender;
 import org.whispersystems.pushserver.entities.GcmMessage;
 import org.whispersystems.pushserver.entities.UnregisteredEvent;
+import org.whispersystems.pushserver.util.Constants;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 public class HttpGCMSender implements GCMSender {
 
   private final Logger logger = LoggerFactory.getLogger(HttpGCMSender.class);
+
+  private final MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(Constants.METRICS_NAME);
+  private final Meter          success        = metricRegistry.meter(name(getClass(), "sent", "success"));
+  private final Meter          failure        = metricRegistry.meter(name(getClass(), "sent", "failure"));
+  private final Meter          unregistered   = metricRegistry.meter(name(getClass(), "sent", "unregistered"));
+  private final Meter          canonical      = metricRegistry.meter(name(getClass(), "sent", "canonical"));
 
   private final Sender            sender;
   private final UnregisteredQueue unregisteredQueue;
@@ -44,8 +56,10 @@ public class HttpGCMSender implements GCMSender {
           handleBadRegistration(result);
         } else if (result.hasCanonicalRegistrationId()) {
           handleCanonicalRegistrationId(result);
-        } else if (!result.isSuccess())                                         {
+        } else if (!result.isSuccess()) {
           handleGenericError(result);
+        } else {
+          success.mark();
         }
       }
 
@@ -72,11 +86,13 @@ public class HttpGCMSender implements GCMSender {
     logger.warn("Got GCM unregistered notice! " + message.getGcmId());
     unregisteredQueue.put(new UnregisteredEvent(message.getGcmId(), message.getNumber(),
                                                 message.getDeviceId(), System.currentTimeMillis()));
+    unregistered.mark();
   }
 
   private void handleCanonicalRegistrationId(Result result) {
     logger.warn(String.format("Actually received 'CanonicalRegistrationId' ::: (canonical=%s), (original=%s)",
                               result.getCanonicalRegistrationId(), ((GcmMessage)result.getContext()).getGcmId()));
+    canonical.mark();
   }
 
   private void handleGenericError(Result result) {
@@ -85,5 +101,6 @@ public class HttpGCMSender implements GCMSender {
                               "(destination=%s), (device_id=%d)",
                               result.getError(), message.getGcmId(), message.getNumber(),
                               message.getDeviceId()));
+    failure.mark();
   }
 }
