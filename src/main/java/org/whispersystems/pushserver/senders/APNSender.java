@@ -137,14 +137,14 @@ public class APNSender implements Managed {
 
   private void redisSet(String registrationId, String number, int deviceId) {
     try (Jedis jedis = jedisPool.getResource()) {
-      jedis.set("APN-" + registrationId, number + "." + deviceId);
-      jedis.expire("APN-" + registrationId, (int) TimeUnit.HOURS.toSeconds(1));
+      jedis.set("APN-" + registrationId.toLowerCase(), number + "." + deviceId);
+      jedis.expire("APN-" + registrationId.toLowerCase(), (int) TimeUnit.HOURS.toSeconds(1));
     }
   }
 
   private Optional<String> redisGet(String registrationId) {
     try (Jedis jedis = jedisPool.getResource()) {
-      String number = jedis.get("APN-" + registrationId);
+      String number = jedis.get("APN-" + registrationId.toLowerCase());
       return Optional.fromNullable(number);
     }
   }
