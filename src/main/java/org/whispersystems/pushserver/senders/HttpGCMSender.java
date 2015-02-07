@@ -44,7 +44,9 @@ public class HttpGCMSender implements GCMSender {
   public void sendMessage(GcmMessage message) {
     Message request = Message.newBuilder()
                              .withDestination(message.getGcmId())
-                             .withDataPart(message.isReceipt() ? "receipt" : "message", message.getMessage())
+                             .withDataPart(message.isReceipt() ? "receipt" :
+                                               message.isNotification() ?
+                                                   "notification" : "message", message.getMessage())
                              .build();
 
     ListenableFuture<Result> future = sender.send(request, message);

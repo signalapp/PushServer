@@ -21,11 +21,13 @@ public class GcmMessage {
   private int deviceId;
 
   @JsonProperty
-  @NotEmpty
   private String message;
 
   @JsonProperty
   private boolean receipt;
+
+  @JsonProperty
+  private boolean notification;
 
   public GcmMessage() {}
 
@@ -52,6 +54,10 @@ public class GcmMessage {
 
   public boolean isReceipt() {
     return receipt;
+  }
+
+  public boolean isNotification() {
+    return notification;
   }
 
   public int getDeviceId() {
