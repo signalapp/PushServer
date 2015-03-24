@@ -11,19 +11,17 @@ import org.whispersystems.pushserver.config.ApnConfiguration;
 import org.whispersystems.pushserver.config.GcmConfiguration;
 import org.whispersystems.pushserver.controllers.FeedbackController;
 import org.whispersystems.pushserver.controllers.PushController;
-import org.whispersystems.pushserver.metrics.JsonMetricsReporter;
 import org.whispersystems.pushserver.providers.RedisClientFactory;
 import org.whispersystems.pushserver.providers.RedisHealthCheck;
 import org.whispersystems.pushserver.senders.APNSender;
 import org.whispersystems.pushserver.senders.GCMSender;
 import org.whispersystems.pushserver.senders.HttpGCMSender;
-import org.whispersystems.pushserver.senders.XmppGCMSender;
 import org.whispersystems.pushserver.senders.UnregisteredQueue;
+import org.whispersystems.pushserver.senders.XmppGCMSender;
 import org.whispersystems.pushserver.util.Constants;
 
 import java.security.Security;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.dropwizard.Application;
 import io.dropwizard.auth.basic.BasicAuthProvider;
@@ -71,8 +69,10 @@ public class PushServer extends Application<PushServerConfiguration> {
                                         ApnConfiguration configuration)
   {
     return new APNSender(redisClient, apnQueue,
-                         configuration.getCertificate(),
-                         configuration.getKey(),
+                         configuration.getPushCertificate(),
+                         configuration.getPushKey(),
+                         configuration.getVoipCertificate(),
+                         configuration.getVoipKey(),
                          configuration.isFeedbackEnabled());
   }
 

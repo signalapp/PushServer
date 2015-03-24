@@ -36,7 +36,7 @@ public class PushControllerTest {
   public void testSendApn() throws TransientPushFailureException {
     ClientResponse response = resources.client().resource("/api/v1/push/apn/")
                                        .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobar"))
-                                       .entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!"), MediaType.APPLICATION_JSON)
+                                       .entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON)
                                        .put(ClientResponse.class);
 
     assertThat(response.getStatus()).isEqualTo(204);
@@ -73,7 +73,7 @@ public class PushControllerTest {
   public void testUnauthorizedSendApn() throws TransientPushFailureException {
     ClientResponse response = resources.client().resource("/api/v1/push/apn/")
                                        .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobar"))
-                                       .entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!"), MediaType.APPLICATION_JSON)
+                                       .entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON)
                                        .put(ClientResponse.class);
 
     assertThat(response.getStatus()).isEqualTo(401);

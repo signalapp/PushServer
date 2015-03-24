@@ -219,6 +219,7 @@ public class XmppGCMSender implements GCMSender, PacketListener {
 
       if (unacknowledgedMessage != null) {
         unregisteredQueue.put(new UnregisteredEvent(unacknowledgedMessage.getGcmId(),
+                                                    null,
                                                     unacknowledgedMessage.getNumber(),
                                                     unacknowledgedMessage.getDeviceId(),
                                                     System.currentTimeMillis()));

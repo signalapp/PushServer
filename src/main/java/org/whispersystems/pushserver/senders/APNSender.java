@@ -56,6 +56,7 @@ public class APNSender implements Managed {
 
   private final MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(Constants.METRICS_NAME);
 
+  private final Meter  voipMeter    = metricRegistry.meter(name(getClass(), "voip"));
   private final Meter  pushMeter    = metricRegistry.meter(name(getClass(), "push"));
   private final Meter  failureMeter = metricRegistry.meter(name(getClass(), "failure"));
   private final Logger logger       = LoggerFactory.getLogger(APNSender.class);
@@ -64,19 +65,26 @@ public class APNSender implements Managed {
 
   private final JedisPool         jedisPool;
   private final UnregisteredQueue unregisteredQueue;
-  private final String            apnCertificate;
-  private final String            apnKey;
+  private final String            pushCertificate;
+  private final String            pushKey;
+  private final String            voipCertificate;
+  private final String            voipKey;
   private final boolean           feedbackEnabled;
 
-  private ApnsService apnService;
+  private ApnsService pushApnService;
+  private ApnsService voipApnService;
 
   public APNSender(JedisPool jedisPool, UnregisteredQueue unregisteredQueue,
-                   String apnCertificate, String apnKey, boolean feedbackEnabled)
+                   String pushCertificate, String pushKey,
+                   String voipCertificate, String voipKey,
+                   boolean feedbackEnabled)
   {
     this.jedisPool         = jedisPool;
     this.unregisteredQueue = unregisteredQueue;
-    this.apnCertificate    = apnCertificate;
-    this.apnKey            = apnKey;
+    this.pushCertificate   = pushCertificate;
+    this.pushKey           = pushKey;
+    this.voipCertificate   = voipCertificate;
+    this.voipKey           = voipKey;
     this.feedbackEnabled   = feedbackEnabled;
   }
 
@@ -85,8 +93,14 @@ public class APNSender implements Managed {
   {
     try {
       redisSet(message.getApnId(), message.getNumber(), message.getDeviceId());
-      apnService.push(message.getApnId(), message.getMessage());
-      pushMeter.mark();
+
+      if (message.isVoip()) {
+        voipApnService.push(message.getApnId(), message.getMessage());
+        voipMeter.mark();
+      } else {
+        pushApnService.push(message.getApnId(), message.getMessage());
+        pushMeter.mark();
+      }
     } catch (NetworkIOException nioe) {
       logger.warn("Network Error", nioe);
       failureMeter.mark();
@@ -118,12 +132,18 @@ public class APNSender implements Managed {
 
   @Override
   public void start() throws Exception {
-    byte[] keyStore = initializeKeyStore(apnCertificate, apnKey);
+    byte[] pushKeyStore = initializeKeyStore(pushCertificate, pushKey);
+    byte[] voipKeyStore = initializeKeyStore(voipCertificate, voipKey);
 
-    this.apnService = APNS.newService()
-                          .withCert(new ByteArrayInputStream(keyStore), "insecure")
-                          .asQueued()
-                          .withProductionDestination().build();
+    this.pushApnService = APNS.newService()
+                              .withCert(new ByteArrayInputStream(pushKeyStore), "insecure")
+                              .asQueued()
+                              .withProductionDestination().build();
+
+    this.voipApnService = APNS.newService()
+                              .withCert(new ByteArrayInputStream(voipKeyStore), "insecure")
+                              .asQueued()
+                              .withProductionDestination().build();
 
     if (feedbackEnabled) {
       this.executor.scheduleAtFixedRate(new FeedbackRunnable(), 0, 1, TimeUnit.HOURS);
@@ -132,7 +152,8 @@ public class APNSender implements Managed {
 
   @Override
   public void stop() throws Exception {
-    apnService.stop();
+    pushApnService.stop();
+    voipApnService.stop();
   }
 
   private void redisSet(String registrationId, String number, int deviceId) {
@@ -150,9 +171,11 @@ public class APNSender implements Managed {
   }
 
   private class FeedbackRunnable implements Runnable {
+
     @Override
     public void run() {
-      Map<String, Date> inactiveDevices = apnService.getInactiveDevices();
+      Map<String, Date> inactiveDevices = pushApnService.getInactiveDevices();
+      inactiveDevices.putAll(voipApnService.getInactiveDevices());
 
       for (String registrationId : inactiveDevices.keySet()) {
         Optional<String> device = redisGet(registrationId);
@@ -166,7 +189,7 @@ public class APNSender implements Managed {
             int    deviceId  = Integer.parseInt(parts[1]);
             long   timestamp = inactiveDevices.get(registrationId).getTime();
 
-            unregisteredQueue.put(new UnregisteredEvent(registrationId, number, deviceId, timestamp));
+            unregisteredQueue.put(new UnregisteredEvent(registrationId, null, number, deviceId, timestamp));
           } else {
             logger.warn("APN unregister event for device with no parts: " + device.get());
           }

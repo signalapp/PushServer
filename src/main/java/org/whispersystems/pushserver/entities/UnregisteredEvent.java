@@ -9,6 +9,9 @@ public class UnregisteredEvent {
   private String registrationId;
 
   @JsonProperty
+  private String canonicalId;
+
+  @JsonProperty
   private String number;
 
   @JsonProperty
@@ -19,8 +22,9 @@ public class UnregisteredEvent {
 
   public UnregisteredEvent() {}
 
-  public UnregisteredEvent(String registrationId, String number, int deviceId, long timestamp) {
+  public UnregisteredEvent(String registrationId, String canonicalId, String number, int deviceId, long timestamp) {
     this.registrationId = registrationId;
+    this.canonicalId    = canonicalId;
     this.number         = number;
     this.deviceId       = deviceId;
     this.timestamp      = timestamp;

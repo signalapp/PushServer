@@ -24,21 +24,37 @@ public class ApnConfiguration {
 
   @NotEmpty
   @JsonProperty
-  private String certificate;
+  private String pushCertificate;
 
   @NotEmpty
   @JsonProperty
-  private String key;
+  private String pushKey;
+
+  @NotEmpty
+  @JsonProperty
+  private String voipCertificate;
+
+  @NotEmpty
+  @JsonProperty
+  private String voipKey;
 
   @JsonProperty
   private boolean feedback = true;
 
-  public String getCertificate() {
-    return certificate;
+  public String getPushCertificate() {
+    return pushCertificate;
   }
 
-  public String getKey() {
-    return key;
+  public String getPushKey() {
+    return pushKey;
+  }
+
+  public String getVoipCertificate() {
+    return voipCertificate;
+  }
+
+  public String getVoipKey() {
+    return voipKey;
   }
 
   public boolean isFeedbackEnabled() {

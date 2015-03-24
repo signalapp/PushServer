@@ -86,14 +86,17 @@ public class HttpGCMSender implements GCMSender {
   private void handleBadRegistration(Result result) {
     GcmMessage message = (GcmMessage)result.getContext();
     logger.warn("Got GCM unregistered notice! " + message.getGcmId());
-    unregisteredQueue.put(new UnregisteredEvent(message.getGcmId(), message.getNumber(),
+    unregisteredQueue.put(new UnregisteredEvent(message.getGcmId(), null, message.getNumber(),
                                                 message.getDeviceId(), System.currentTimeMillis()));
     unregistered.mark();
   }
 
   private void handleCanonicalRegistrationId(Result result) {
+    GcmMessage message = (GcmMessage)result.getContext();
     logger.warn(String.format("Actually received 'CanonicalRegistrationId' ::: (canonical=%s), (original=%s)",
-                              result.getCanonicalRegistrationId(), ((GcmMessage)result.getContext()).getGcmId()));
+                              result.getCanonicalRegistrationId(), message.getGcmId()));
+    unregisteredQueue.put(new UnregisteredEvent(message.getGcmId(), result.getCanonicalRegistrationId(),
+                                                message.getNumber(), message.getDeviceId(), System.currentTimeMillis()));
     canonical.mark();
   }
 

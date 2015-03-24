@@ -25,14 +25,19 @@ public class ApnMessage {
   @NotEmpty
   private String message;
 
+  @JsonProperty
+  @NotNull
+  private boolean voip;
+
   public ApnMessage() {}
 
   @VisibleForTesting
-  public ApnMessage(String apnId, String number, int deviceId, String message) {
+  public ApnMessage(String apnId, String number, int deviceId, String message, boolean voip) {
     this.apnId    = apnId;
     this.number   = number;
     this.deviceId = deviceId;
     this.message  = message;
+    this.voip     = voip;
   }
 
   public String getApnId() {
@@ -49,5 +54,9 @@ public class ApnMessage {
 
   public String getMessage() {
     return message;
+  }
+
+  public boolean isVoip() {
+    return voip;
   }
 }
