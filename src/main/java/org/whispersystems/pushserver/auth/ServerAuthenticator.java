@@ -2,6 +2,8 @@ package org.whispersystems.pushserver.auth;
 
 import com.google.common.base.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.whispersystems.pushserver.config.AuthenticationConfiguration;
 
 import java.security.MessageDigest;
@@ -12,6 +14,8 @@ import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
 
 public class ServerAuthenticator implements Authenticator<BasicCredentials, Server> {
+
+  private static final Logger logger = LoggerFactory.getLogger(ServerAuthenticator.class);
 
   private final List<Server> servers;
 

@@ -1,22 +1,25 @@
 package org.whispersystems.pushserver.controllers;
 
-import com.sun.jersey.api.client.ClientResponse;
+import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.whispersystems.pushserver.auth.Server;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
-import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 import org.whispersystems.pushserver.entities.UnregisteredEvent;
 import org.whispersystems.pushserver.entities.UnregisteredEventList;
 import org.whispersystems.pushserver.senders.UnregisteredQueue;
 import org.whispersystems.pushserver.util.AuthHelper;
+import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 
+import javax.ws.rs.core.Response;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.dropwizard.auth.basic.BasicAuthProvider;
+import io.dropwizard.auth.AuthFactory;
+import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.testing.junit.ResourceTestRule;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,8 +32,9 @@ public class FeedbackControllerTest {
   @ClassRule
   public static final ResourceTestRule resources =
       ResourceTestRule.builder()
+                      .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
+                      .addProvider(AuthFactory.binder(new BasicAuthFactory<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST", Server.class)))
                       .addResource(new FeedbackController(gcmQueue, apnQueue))
-                      .addProvider(new BasicAuthProvider<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST"))
                       .build();
 
   @Before
@@ -52,13 +56,14 @@ public class FeedbackControllerTest {
 
   @Test
   public void testGcmFeedback() {
-    ClientResponse clientResponse = resources.client().resource("/api/v1/feedback/gcm")
-                                             .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobar"))
-                                             .get(ClientResponse.class);
+    Response clientResponse = resources.getJerseyTest().target("/api/v1/feedback/gcm")
+                                       .request()
+                                       .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobar"))
+                                       .get(Response.class);
 
     assertThat(clientResponse.getStatus()).isEqualTo(200);
 
-    UnregisteredEventList list = clientResponse.getEntity(UnregisteredEventList.class);
+    UnregisteredEventList list = clientResponse.readEntity(UnregisteredEventList.class);
     assertThat(list.getDevices().size()).isEqualTo(3);
 
     assertThat(list.getDevices().get(0).getRegistrationId()).isEqualTo("1234");
@@ -76,13 +81,14 @@ public class FeedbackControllerTest {
 
   @Test
   public void testApnFeedback() {
-    ClientResponse clientResponse = resources.client().resource("/api/v1/feedback/apn")
-                                             .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobaz"))
-                                             .get(ClientResponse.class);
+    Response clientResponse = resources.getJerseyTest().target("/api/v1/feedback/apn")
+                                       .request()
+                                       .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobaz"))
+                                       .get(Response.class);
 
     assertThat(clientResponse.getStatus()).isEqualTo(200);
 
-    UnregisteredEventList list = clientResponse.getEntity(UnregisteredEventList.class);
+    UnregisteredEventList list = clientResponse.readEntity(UnregisteredEventList.class);
     assertThat(list.getDevices().size()).isEqualTo(2);
 
     assertThat(list.getDevices().get(0).getRegistrationId()).isEqualTo("6666");
@@ -96,18 +102,20 @@ public class FeedbackControllerTest {
 
   @Test
   public void testGcmFeedbackUnauthorized() {
-    ClientResponse clientResponse = resources.client().resource("/api/v1/feedback/gcm")
-                                             .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobaz"))
-                                             .get(ClientResponse.class);
+    Response clientResponse = resources.getJerseyTest().target("/api/v1/feedback/gcm")
+                                       .request()
+                                       .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobaz"))
+                                       .get(Response.class);
 
     assertThat(clientResponse.getStatus()).isEqualTo(401);
   }
 
   @Test
   public void testApnFeedbackUnauthorized() {
-    ClientResponse clientResponse = resources.client().resource("/api/v1/feedback/apn")
-                                             .header("Authorization", AuthHelper.getAuthHeader("something", "foobar"))
-                                             .get(ClientResponse.class);
+    Response clientResponse = resources.getJerseyTest().target("/api/v1/feedback/apn")
+                                       .request()
+                                       .header("Authorization", AuthHelper.getAuthHeader("something", "foobar"))
+                                       .get(Response.class);
 
     assertThat(clientResponse.getStatus()).isEqualTo(401);
   }

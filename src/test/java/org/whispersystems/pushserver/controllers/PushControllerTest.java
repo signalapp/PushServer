@@ -1,9 +1,11 @@
 package org.whispersystems.pushserver.controllers;
 
-import com.sun.jersey.api.client.ClientResponse;
+import org.glassfish.jersey.client.ClientResponse;
+import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.whispersystems.pushserver.auth.Server;
 import org.whispersystems.pushserver.auth.ServerAuthenticator;
 import org.whispersystems.pushserver.entities.ApnMessage;
 import org.whispersystems.pushserver.entities.GcmMessage;
@@ -13,11 +15,14 @@ import org.whispersystems.pushserver.senders.TransientPushFailureException;
 import org.whispersystems.pushserver.util.AuthHelper;
 import org.whispersystems.pushserver.util.MockAuthenticationConfig;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import io.dropwizard.auth.basic.BasicAuthProvider;
+import io.dropwizard.auth.AuthFactory;
+import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.testing.junit.ResourceTestRule;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class PushControllerTest {
@@ -28,16 +33,17 @@ public class PushControllerTest {
   @ClassRule
   public static final ResourceTestRule resources =
       ResourceTestRule.builder()
+                      .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
                       .addResource(new PushController(apnSender, gcmSender))
-                      .addProvider(new BasicAuthProvider<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST"))
+                      .addProvider(AuthFactory.binder(new BasicAuthFactory<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST", Server.class)))
                       .build();
 
   @Test
   public void testSendApn() throws TransientPushFailureException {
-    ClientResponse response = resources.client().resource("/api/v1/push/apn/")
-                                       .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobar"))
-                                       .entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON)
-                                       .put(ClientResponse.class);
+    Response response = resources.getJerseyTest().target("/api/v1/push/apn/")
+                                 .request()
+                                 .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobar"))
+                                 .put(Entity.entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON));
 
     assertThat(response.getStatus()).isEqualTo(204);
 
@@ -52,10 +58,10 @@ public class PushControllerTest {
 
   @Test
   public void testSendGcm() {
-    ClientResponse response = resources.client().resource("/api/v1/push/gcm/")
-                                       .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobaz"))
-                                       .entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON)
-                                       .put(ClientResponse.class);
+    Response response = resources.getJerseyTest().target("/api/v1/push/gcm/")
+                                 .request()
+                                 .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobaz"))
+                                 .put(Entity.entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON));
 
     assertThat(response.getStatus()).isEqualTo(204);
 
@@ -71,10 +77,10 @@ public class PushControllerTest {
 
   @Test
   public void testUnauthorizedSendApn() throws TransientPushFailureException {
-    ClientResponse response = resources.client().resource("/api/v1/push/apn/")
-                                       .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobar"))
-                                       .entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON)
-                                       .put(ClientResponse.class);
+    Response response = resources.getJerseyTest().target("/api/v1/push/apn/")
+                                 .request()
+                                 .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobar"))
+                                 .put(Entity.entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON), Response.class);
 
     assertThat(response.getStatus()).isEqualTo(401);
     verifyNoMoreInteractions(apnSender);
@@ -82,10 +88,10 @@ public class PushControllerTest {
 
   @Test
   public void testUnauthorizedSendGcm() {
-    ClientResponse response = resources.client().resource("/api/v1/push/gcm/")
-                                       .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobaz"))
-                                       .entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON)
-                                       .put(ClientResponse.class);
+    Response response = resources.getJerseyTest().target("/api/v1/push/gcm/")
+                                 .request()
+                                 .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobaz"))
+                                 .put(Entity.entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON), Response.class);
 
     assertThat(response.getStatus()).isEqualTo(401);
     verifyNoMoreInteractions(gcmSender);

@@ -24,7 +24,8 @@ import java.security.Security;
 import java.util.List;
 
 import io.dropwizard.Application;
-import io.dropwizard.auth.basic.BasicAuthProvider;
+import io.dropwizard.auth.AuthFactory;
+import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import redis.clients.jedis.JedisPool;
@@ -57,7 +58,7 @@ public class PushServer extends Application<PushServerConfiguration> {
     environment.lifecycle().manage(apnSender);
     environment.lifecycle().manage(gcmSender);
 
-    environment.jersey().register(new BasicAuthProvider<>(serverAuthenticator, "PushServer"));
+    environment.jersey().register(AuthFactory.binder(new BasicAuthFactory<>(serverAuthenticator, "PushServer", Server.class)));
     environment.jersey().register(new PushController(apnSender, gcmSender));
     environment.jersey().register(new FeedbackController(gcmQueue, apnQueue));
 
