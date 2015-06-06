@@ -43,7 +43,7 @@ public class PushControllerTest {
     Response response = resources.getJerseyTest().target("/api/v1/push/apn/")
                                  .request()
                                  .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobar"))
-                                 .put(Entity.entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON));
+                                 .put(Entity.entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false, 1111), MediaType.APPLICATION_JSON));
 
     assertThat(response.getStatus()).isEqualTo(204);
 
@@ -54,6 +54,7 @@ public class PushControllerTest {
     assertThat(captor.getValue().getDeviceId()).isEqualTo(1);
     assertThat(captor.getValue().getNumber()).isEqualTo("+14152222222");
     assertThat(captor.getValue().getMessage()).isEqualTo("Hey there!");
+    assertThat(captor.getValue().getExpirationTime()).isEqualTo(1111);
   }
 
   @Test
@@ -80,7 +81,7 @@ public class PushControllerTest {
     Response response = resources.getJerseyTest().target("/api/v1/push/apn/")
                                  .request()
                                  .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobar"))
-                                 .put(Entity.entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON), Response.class);
+                                 .put(Entity.entity(new ApnMessage("12345", "+14152222222", 1, "Hey there!", false, 2222), MediaType.APPLICATION_JSON), Response.class);
 
     assertThat(response.getStatus()).isEqualTo(401);
     verifyNoMoreInteractions(apnSender);

@@ -95,10 +95,10 @@ public class APNSender implements Managed {
       redisSet(message.getApnId(), message.getNumber(), message.getDeviceId());
 
       if (message.isVoip()) {
-        voipApnService.push(message.getApnId(), message.getMessage());
+        voipApnService.push(message.getApnId(), message.getMessage(), new Date(message.getExpirationTime()));
         voipMeter.mark();
       } else {
-        pushApnService.push(message.getApnId(), message.getMessage());
+        pushApnService.push(message.getApnId(), message.getMessage(), new Date(message.getExpirationTime()));
         pushMeter.mark();
       }
     } catch (NetworkIOException nioe) {

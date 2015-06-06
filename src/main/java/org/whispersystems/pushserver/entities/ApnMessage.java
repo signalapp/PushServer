@@ -29,15 +29,19 @@ public class ApnMessage {
   @NotNull
   private boolean voip;
 
+  @JsonProperty
+  private long expirationTime = Integer.MAX_VALUE * 1000L;
+
   public ApnMessage() {}
 
   @VisibleForTesting
-  public ApnMessage(String apnId, String number, int deviceId, String message, boolean voip) {
-    this.apnId    = apnId;
-    this.number   = number;
-    this.deviceId = deviceId;
-    this.message  = message;
-    this.voip     = voip;
+  public ApnMessage(String apnId, String number, int deviceId, String message, boolean voip, long expirationTime) {
+    this.apnId          = apnId;
+    this.number         = number;
+    this.deviceId       = deviceId;
+    this.message        = message;
+    this.voip           = voip;
+    this.expirationTime = expirationTime;
   }
 
   public String getApnId() {
@@ -58,5 +62,9 @@ public class ApnMessage {
 
   public boolean isVoip() {
     return voip;
+  }
+
+  public long getExpirationTime() {
+    return expirationTime;
   }
 }
