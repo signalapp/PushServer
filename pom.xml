@@ -160,7 +160,7 @@
                             <manifest>
                                 <entry>
                                     <key>JVM-Args</key>
-                                    <value>-server -Djava.awt.headless=true -Xmx512m -Xss512k -Dhttps.protocols="TLSv1,TLSv1.1,TLSv1.2"</value>
+                                    <value>-server -Djava.awt.headless=true -Xmx512m -Xss512k -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2</value>
                                 </entry>
                             </manifest>
                             <modes>
