@@ -31,25 +31,33 @@ public class HttpGCMSender implements GCMSender {
   private final Meter          unregistered   = metricRegistry.meter(name(getClass(), "sent", "unregistered"));
   private final Meter          canonical      = metricRegistry.meter(name(getClass(), "sent", "canonical"));
 
-  private final Sender            sender;
+  private final Sender            signalSender;
+  private final Sender            redphoneSender;
   private final UnregisteredQueue unregisteredQueue;
   private       ExecutorService   executor;
 
-  public HttpGCMSender(UnregisteredQueue unregisteredQueue, String apiKey) {
+  public HttpGCMSender(UnregisteredQueue unregisteredQueue, String signalKey, String redphoneKey) {
     this.unregisteredQueue = unregisteredQueue;
-    this.sender            = new Sender(apiKey, 50);
+    this.signalSender      = new Sender(signalKey, 50);
+    this.redphoneSender    = new Sender(redphoneKey, 50);
   }
 
   @Override
   public void sendMessage(GcmMessage message) {
-    Message request = Message.newBuilder()
-                             .withDestination(message.getGcmId())
-                             .withDataPart(message.isReceipt() ? "receipt" :
-                                               message.isNotification() ?
-                                                   "notification" : "message", message.getMessage())
-                             .build();
+    Message.Builder builder = Message.newBuilder().withDestination(message.getGcmId());
 
-    ListenableFuture<Result> future = sender.send(request, message);
+    ListenableFuture<Result> future;
+
+    if (!message.isRedphone()) {
+      String  key     = message.isReceipt() ? "receipt" : message.isNotification() ? "notification" : message.isCall() ? "call" : "message";
+      Message request = builder.withDataPart(key, message.getMessage()).build();
+
+      future = signalSender.send(request, message);
+    } else {
+      Message request = builder.withDataPart("signal", message.getMessage()).build();
+
+      future = redphoneSender.send(request, message);
+    }
 
     Futures.addCallback(future, new FutureCallback<Result>() {
       @Override
@@ -79,7 +87,8 @@ public class HttpGCMSender implements GCMSender {
 
   @Override
   public void stop() throws IOException {
-    this.sender.stop();
+    this.signalSender.stop();
+    this.redphoneSender.stop();
     this.executor.shutdown();
   }
 

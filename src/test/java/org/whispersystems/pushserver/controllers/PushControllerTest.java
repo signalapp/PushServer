@@ -1,6 +1,5 @@
 package org.whispersystems.pushserver.controllers;
 
-import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -62,7 +61,7 @@ public class PushControllerTest {
     Response response = resources.getJerseyTest().target("/api/v1/push/gcm/")
                                  .request()
                                  .header("Authorization", AuthHelper.getAuthHeader("redphone", "foobaz"))
-                                 .put(Entity.entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON));
+                                 .put(Entity.entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false, false, false, false), MediaType.APPLICATION_JSON));
 
     assertThat(response.getStatus()).isEqualTo(204);
 
@@ -92,7 +91,7 @@ public class PushControllerTest {
     Response response = resources.getJerseyTest().target("/api/v1/push/gcm/")
                                  .request()
                                  .header("Authorization", AuthHelper.getAuthHeader("textsecure", "foobaz"))
-                                 .put(Entity.entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false), MediaType.APPLICATION_JSON), Response.class);
+                                 .put(Entity.entity(new GcmMessage("12345", "+14152222222", 1, "Hey there!", false, false, false, false), MediaType.APPLICATION_JSON), Response.class);
 
     assertThat(response.getStatus()).isEqualTo(401);
     verifyNoMoreInteractions(gcmSender);

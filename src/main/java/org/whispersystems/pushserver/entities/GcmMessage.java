@@ -29,15 +29,25 @@ public class GcmMessage {
   @JsonProperty
   private boolean notification;
 
+  @JsonProperty
+  private boolean redphone;
+
+  @JsonProperty
+  private boolean call;
+
   public GcmMessage() {}
 
   @VisibleForTesting
-  public GcmMessage(String gcmId, String number, int deviceId, String message, boolean receipt) {
-    this.gcmId    = gcmId;
-    this.number   = number;
-    this.deviceId = deviceId;
-    this.message  = message;
-    this.receipt  = receipt;
+  public GcmMessage(String gcmId, String number, int deviceId, String message,
+                    boolean receipt, boolean notification, boolean redphone, boolean call) {
+    this.gcmId        = gcmId;
+    this.number       = number;
+    this.deviceId     = deviceId;
+    this.message      = message;
+    this.receipt      = receipt;
+    this.notification = notification;
+    this.redphone     = redphone;
+    this.call         = call;
   }
 
   public String getGcmId() {
@@ -58,6 +68,14 @@ public class GcmMessage {
 
   public boolean isNotification() {
     return notification;
+  }
+
+  public boolean isRedphone() {
+    return redphone;
+  }
+
+  public boolean isCall() {
+    return call;
   }
 
   public int getDeviceId() {
