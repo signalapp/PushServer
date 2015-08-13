@@ -16,6 +16,8 @@ import org.whispersystems.pushserver.entities.UnregisteredEvent;
 import org.whispersystems.pushserver.util.Constants;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,6 +32,14 @@ public class HttpGCMSender implements GCMSender {
   private final Meter          failure        = metricRegistry.meter(name(getClass(), "sent", "failure"));
   private final Meter          unregistered   = metricRegistry.meter(name(getClass(), "sent", "unregistered"));
   private final Meter          canonical      = metricRegistry.meter(name(getClass(), "sent", "canonical"));
+
+  private final Map<String, Meter> outboundMeters = new HashMap<String, Meter>() {{
+    put("receipt", metricRegistry.meter(name(getClass(), "outbound", "receipt")));
+    put("notification", metricRegistry.meter(name(getClass(), "outbound", "notification")));
+    put("call", metricRegistry.meter(name(getClass(), "outbound", "call")));
+    put("message", metricRegistry.meter(name(getClass(), "outbound", "message")));
+    put("signal", metricRegistry.meter(name(getClass(), "outbound", "signal")));
+  }};
 
   private final Sender            signalSender;
   private final Sender            redphoneSender;
@@ -53,10 +63,12 @@ public class HttpGCMSender implements GCMSender {
       Message request = builder.withDataPart(key, message.getMessage()).build();
 
       future = signalSender.send(request, message);
+      markOutboundMeter(key);
     } else {
       Message request = builder.withDataPart("signal", message.getMessage()).build();
 
       future = redphoneSender.send(request, message);
+      markOutboundMeter("signal");
     }
 
     Futures.addCallback(future, new FutureCallback<Result>() {
@@ -116,5 +128,12 @@ public class HttpGCMSender implements GCMSender {
                               result.getError(), message.getGcmId(), message.getNumber(),
                               message.getDeviceId()));
     failure.mark();
+  }
+
+  private void markOutboundMeter(String key) {
+    Meter meter = outboundMeters.get(key);
+
+    if (meter != null) meter.mark();
+    else               logger.warn("Unknown outbound key: " + key);
   }
 }
