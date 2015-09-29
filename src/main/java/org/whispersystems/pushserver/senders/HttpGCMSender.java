@@ -54,7 +54,9 @@ public class HttpGCMSender implements GCMSender {
 
   @Override
   public void sendMessage(GcmMessage message) {
-    Message.Builder builder = Message.newBuilder().withDestination(message.getGcmId());
+    Message.Builder builder = Message.newBuilder()
+                                     .withDestination(message.getGcmId())
+                                     .withPriority("high");
 
     ListenableFuture<Result> future;
 

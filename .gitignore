@@ -4,3 +4,4 @@ target
 config/local.yml
 config/staging.yml
 config/production.yml
+put.sh
