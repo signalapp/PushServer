@@ -15,6 +15,7 @@ import org.whispersystems.pushserver.providers.RedisClientFactory;
 import org.whispersystems.pushserver.providers.RedisHealthCheck;
 import org.whispersystems.pushserver.senders.APNSender;
 import org.whispersystems.pushserver.senders.GCMSender;
+import org.whispersystems.pushserver.senders.UPSSender;
 import org.whispersystems.pushserver.senders.HttpGCMSender;
 import org.whispersystems.pushserver.senders.UnregisteredQueue;
 import org.whispersystems.pushserver.senders.XmppGCMSender;
@@ -51,16 +52,19 @@ public class PushServer extends Application<PushServerConfiguration> {
     List<Server>        servers             = config.getAuthenticationConfiguration().getServers();
     UnregisteredQueue   apnQueue            = new UnregisteredQueue(redisClient, environment.getObjectMapper(), servers, "apn");
     UnregisteredQueue   gcmQueue            = new UnregisteredQueue(redisClient, environment.getObjectMapper(), servers, "gcm");
+    UnregisteredQueue   upsQueue            = new UnregisteredQueue(redisClient, environment.getObjectMapper(), servers, "ups");
 
     APNSender apnSender = initializeApnSender(redisClient, apnQueue, config.getApnConfiguration());
     GCMSender gcmSender = initializeGcmSender(gcmQueue, config.getGcmConfiguration());
+    UPSSender upsSender = initializeUpsSender(upsQueue);
 
     environment.lifecycle().manage(apnSender);
     environment.lifecycle().manage(gcmSender);
+    environment.lifecycle().manage(upsSender);
 
     environment.jersey().register(AuthFactory.binder(new BasicAuthFactory<>(serverAuthenticator, "PushServer", Server.class)));
-    environment.jersey().register(new PushController(apnSender, gcmSender));
-    environment.jersey().register(new FeedbackController(gcmQueue, apnQueue));
+    environment.jersey().register(new PushController(apnSender, gcmSender, upsSender));
+    environment.jersey().register(new FeedbackController(gcmQueue, apnQueue, upsQueue));
 
     environment.healthChecks().register("Redis", new RedisHealthCheck(redisClient));
   }
@@ -87,6 +91,10 @@ public class PushServer extends Application<PushServerConfiguration> {
       logger.info("Using HTTP GCM Interface.");
       return new HttpGCMSender(gcmQueue, configuration.getApiKey(), configuration.getRedphoneApiKey());
     }
+  }
+
+  private UPSSender initializeUpsSender(UnregisteredQueue upsQueue) {
+    return new UPSSender(upsQueue);
   }
 
   public static void main(String[] args) throws Exception {

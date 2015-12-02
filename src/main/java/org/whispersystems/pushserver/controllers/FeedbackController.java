@@ -18,10 +18,12 @@ public class FeedbackController {
 
   private final UnregisteredQueue gcmQueue;
   private final UnregisteredQueue apnQueue;
+  private final UnregisteredQueue upsQueue;
 
-  public FeedbackController(UnregisteredQueue gcmQueue, UnregisteredQueue apnQueue) {
+  public FeedbackController(UnregisteredQueue gcmQueue, UnregisteredQueue apnQueue, UnregisteredQueue upsQueue) {
     this.gcmQueue = gcmQueue;
     this.apnQueue = apnQueue;
+    this.upsQueue = upsQueue;
   }
 
   @Timed
@@ -38,6 +40,14 @@ public class FeedbackController {
   @Path("/apn/")
   public UnregisteredEventList getUnregisteredApnDevices(@Auth Server server) {
     return new UnregisteredEventList(apnQueue.get(server.getName()));
+  }
+
+  @Timed
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/ups/")
+  public UnregisteredEventList getUnregisteredUpsDevices(@Auth Server server) {
+    return new UnregisteredEventList(upsQueue.get(server.getName()));
   }
 
 }
