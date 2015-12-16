@@ -63,9 +63,9 @@
             <version>0.1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.whispersystems</groupId>
+            <groupId>ro.startx</groupId>
             <artifactId>ups-sender-async</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
 
         <dependency>

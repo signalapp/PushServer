@@ -8,21 +8,18 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.whispersystems.ups.server.Message;
-import org.whispersystems.ups.server.Result;
-import org.whispersystems.ups.server.Sender;
+import ro.startx.ups.server.Message;
+import ro.startx.ups.server.Result;
+import ro.startx.ups.server.Sender;
 import org.whispersystems.pushserver.entities.UpsMessage;
 import org.whispersystems.pushserver.entities.UnregisteredEvent;
 import org.whispersystems.pushserver.util.Constants;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import io.dropwizard.lifecycle.Managed;
 
@@ -31,8 +28,6 @@ import static com.codahale.metrics.MetricRegistry.name;
 public class UPSSender implements Managed {
 
   private static final String APP_ID = "textsecure.jani_textsecure";
-
-  private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
   private final Logger logger = LoggerFactory.getLogger(UPSSender.class);
 
@@ -61,19 +56,10 @@ public class UPSSender implements Managed {
     this.redphoneSender    = new Sender(50);
   }
 
-  private String expirationDate() {
-    long now = System.currentTimeMillis();
-
-    Date tomorrow = new Date(now + 24*60*60*1000);
-
-    return dateFormat.format(tomorrow);
-  }
-
   public void sendMessage(UpsMessage message) {
     Message.Builder builder = Message.newBuilder()
                                      .withAppID(APP_ID)
-                                     .withToken(message.getUpsId())
-                                     .withExpireOn(expirationDate());
+                                     .withToken(message.getUpsId());
 
     ListenableFuture<Result> future;
 
