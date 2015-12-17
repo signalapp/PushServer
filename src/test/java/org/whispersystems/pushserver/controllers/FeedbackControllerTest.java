@@ -28,13 +28,14 @@ public class FeedbackControllerTest {
 
   private static final UnregisteredQueue gcmQueue = mock(UnregisteredQueue.class);
   private static final UnregisteredQueue apnQueue = mock(UnregisteredQueue.class);
+  private static final UnregisteredQueue upsQueue = mock(UnregisteredQueue.class);
 
   @ClassRule
   public static final ResourceTestRule resources =
       ResourceTestRule.builder()
                       .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
                       .addProvider(AuthFactory.binder(new BasicAuthFactory<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST", Server.class)))
-                      .addResource(new FeedbackController(gcmQueue, apnQueue))
+                      .addResource(new FeedbackController(gcmQueue, apnQueue, upsQueue))
                       .build();
 
   @Before

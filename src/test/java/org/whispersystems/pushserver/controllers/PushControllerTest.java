@@ -10,6 +10,7 @@ import org.whispersystems.pushserver.entities.ApnMessage;
 import org.whispersystems.pushserver.entities.GcmMessage;
 import org.whispersystems.pushserver.senders.APNSender;
 import org.whispersystems.pushserver.senders.GCMSender;
+import org.whispersystems.pushserver.senders.UPSSender;
 import org.whispersystems.pushserver.senders.TransientPushFailureException;
 import org.whispersystems.pushserver.util.AuthHelper;
 import org.whispersystems.pushserver.util.MockAuthenticationConfig;
@@ -28,12 +29,13 @@ public class PushControllerTest {
 
   private static final APNSender apnSender = mock(APNSender.class);
   private static final GCMSender gcmSender = mock(GCMSender.class);
+  private static final UPSSender upsSender = mock(UPSSender.class);
 
   @ClassRule
   public static final ResourceTestRule resources =
       ResourceTestRule.builder()
                       .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-                      .addResource(new PushController(apnSender, gcmSender))
+                      .addResource(new PushController(apnSender, gcmSender, upsSender))
                       .addProvider(AuthFactory.binder(new BasicAuthFactory<>(new ServerAuthenticator(new MockAuthenticationConfig()), "TEST", Server.class)))
                       .build();
 

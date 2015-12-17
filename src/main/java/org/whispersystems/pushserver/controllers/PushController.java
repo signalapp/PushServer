@@ -4,8 +4,10 @@ import com.codahale.metrics.annotation.Timed;
 import org.whispersystems.pushserver.auth.Server;
 import org.whispersystems.pushserver.entities.ApnMessage;
 import org.whispersystems.pushserver.entities.GcmMessage;
+import org.whispersystems.pushserver.entities.UpsMessage;
 import org.whispersystems.pushserver.senders.APNSender;
 import org.whispersystems.pushserver.senders.GCMSender;
+import org.whispersystems.pushserver.senders.UPSSender;
 import org.whispersystems.pushserver.senders.TransientPushFailureException;
 
 import javax.validation.Valid;
@@ -21,10 +23,12 @@ public class PushController {
 
   private final APNSender apnSender;
   private final GCMSender gcmSender;
+  private final UPSSender upsSender;
 
-  public PushController(APNSender apnSender, GCMSender gcmSender) {
+  public PushController(APNSender apnSender, GCMSender gcmSender, UPSSender upsSender) {
     this.apnSender = apnSender;
     this.gcmSender = gcmSender;
+    this.upsSender = upsSender;
   }
 
   @Timed
@@ -43,6 +47,14 @@ public class PushController {
       throws TransientPushFailureException
   {
     apnSender.sendMessage(apnMessage);
+  }
+
+  @Timed
+  @PUT
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("/ups")
+  public void sendUpsPush(@Auth Server server, @Valid UpsMessage upsMessage) {
+    upsSender.sendMessage(upsMessage);
   }
 
 }
